@@ -1,0 +1,17 @@
+{
+  "name": "cache-bundle",
+  "version": "1.0.0",
+  "description": "a simple bundle tool based on browserify",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "bundle"
+  ],
+  "author": "ssnau",
+  "license": "MIT"
+}
