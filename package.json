@@ -13,5 +13,13 @@
     "bundle"
   ],
   "author": "ssnau",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssnau/cache-bundle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ssnau/cache-bundle/issues"
+  },
+  "homepage": "https://github.com/ssnau/cache-bundle#readme"
 }
