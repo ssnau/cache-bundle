@@ -21,5 +21,16 @@
   "bugs": {
     "url": "https://github.com/ssnau/cache-bundle/issues"
   },
-  "homepage": "https://github.com/ssnau/cache-bundle#readme"
+  "homepage": "https://github.com/ssnau/cache-bundle#readme",
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "cssnextify": "^1.0.3"
+  },
+  "dependencies": {
+    "browserify": "^11.2.0",
+    "run-callback": "^1.1.0",
+    "sink-transform": "^1.0.0",
+    "through2": "^2.0.0",
+    "xtend": "^4.0.0"
+  }
 }

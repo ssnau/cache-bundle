@@ -11,7 +11,7 @@ var pending = false;
 var updating = false;
 
 var sessions = {};
-function x(file) {
+function x(file, extra) {
     if (sessions[file.file]) {
         var session =  sessions[file.file];
         session.update(file);
@@ -20,6 +20,9 @@ function x(file) {
 
     var b = browserify(opt);
     b.add(file);
+    if (extra && extra.before) {
+      b = extra.before(b);
+    }
     b.on('reset', collect);
     collect();
     b.on('reset', reset);

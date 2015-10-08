@@ -5,7 +5,7 @@ process.on('unhandledRejection', function(a, b){
     console.error('unhandled promise rejection:', a, b);
 });
 
-it('should bundle files', function (done) {
+xit('should bundle files', function (done) {
     bundler({
         file: __dirname + '/fixtures/ggg.js',
         source: 'require("./a"); console.log("i am ggg");'
@@ -18,7 +18,7 @@ it('should bundle files', function (done) {
     });
 });
 
-it('should bundle files and update', function (done) {
+xit('should bundle files and update', function (done) {
     bundler({
         file: __dirname + '/fixtures/ggg.js',
         source: 'require("react"); console.log("i am ggg");'
@@ -38,5 +38,37 @@ it('should bundle files and update', function (done) {
             done();
         });
 
+    });
+});
+
+it('should bundle es6 files', function (done) {
+    bundler({
+        file: __dirname + '/fixtures/abc.js',
+        source: 'require("./es6"); console.log("i am ggg");'
+    }, {
+        before: function (b) {
+            return b.transform(require('babelify'));
+        }
+    }).bundle().then(function(res) {
+        var oldtime = res.duration;
+        var oldbytes = res.bytes;
+        assert.ok(/i am ggg/.test(res.out));
+        done();
+    });
+});
+
+it('should bundle with css files', function (done) {
+    bundler({
+        file: __dirname + '/fixtures/pp.js',
+        source: 'require("./a.css"); console.log("i am ggg");'
+    }, {
+        before: function (b) {
+            return b.transform(require('cssnextify'), {global: true});
+        }
+    }).bundle().then(function(res) {
+        var oldtime = res.duration;
+        var oldbytes = res.bytes;
+        assert.ok(/red/.test(res.out));
+        done();
     });
 });
