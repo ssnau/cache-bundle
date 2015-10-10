@@ -20,10 +20,12 @@ usage
 // ------
 // log('i am b');
 
-bundler({
+var Bundle = require('cache-bundle');
+var bundler = new Bundle();
+budnler.bundle({
     file: __dirname + '/fixtures/ggg.js',
     source: 'require("./a"); console.log("i am ggg");'
-}).bundle().then(function(res) {
+}).then(function(res) {
     assert.ok(/i am a/.test(res.out))
     assert.ok(/i am b/.test(res.out))
     assert.ok(typeof res.bytes === 'number')
@@ -32,21 +34,24 @@ bundler({
 });
 ```
 
-`cache-bundle` will save the cache by the input file path, thus you can update the file by call the same api again.
+`cache-bundle` and get the cached setting for your next round bundling.
 
 
 ```javascript
 // react is very large and may took a second to bundle
-bundler({
+var Bundle = require('cache-bundle');
+var bundler = new Bundle();
+budnler.bundle({
     file: __dirname + '/fixtures/ggg.js',
     source: 'require("react"); console.log("i am ggg");'
-}).bundle().then(function(res) {
+}).then(function(res) {
     // get result within almost 2 seconds
     done();
 });
 
 // some time later
-bundler({
+var b2 = new Bundle(bundler.getOpt());
+b2.bundle({
     file: __dirname + '/fixtures/ggg.js', // file path is not changed
     source: 'require("react"); console.log("i am policae");'  // however, content is modified
 }).bundle().then(function(res) {
@@ -55,23 +60,25 @@ bundler({
 });
 ```
 
-`bundler` will fetch the same session if you provide the same path.
+## work with transform
 
-### clean the session
+use `setTransform` api to bind browserify transform for your bundling.
 
-#### deleteSessionByName(name)
-
-- `name` is the file path.
-
-#### deleteSessionByAge(age)
-
-- `age` is a number representing how long the session should live by millionseconds. If the session is older than the provided age, than the session will be killed.
-
-
-#### getSessions()
-
-- get all the sessions.
-
+```javascript
+var b = new Bundle();
+b.setTransform(function (b) {
+    return b.transform(require('cssnextify'), {global: true});
+});
+b.bundle({
+    file: __dirname + '/fixtures/pp.js',
+    source: 'require("./a.css"); console.log("i am ggg");'
+}).then(function(res) {
+    var oldtime = res.duration;
+    var oldbytes = res.bytes;
+    assert.ok(/red/.test(res.out));
+    done();
+});
+```
 
 License
 ----

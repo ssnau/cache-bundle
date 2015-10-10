@@ -1,32 +1,47 @@
+var path = require('path');
 var browserify = require('browserify');
 var run = require('run-callback');
 var through = require('through2');
 var xtend = require('xtend');
 var sink = require('sink-transform');
-var opt = {
-    cache: {}, packageCache: {}
+
+function safe (fn) {
+  try {
+    return fn();
+  } catch (e) {
+    return void 0;
+  }
+}
+
+function Bundle(opt) {
+    this.opt = opt || {
+        cache: {}, packageCache: {}
+    };
+}
+Bundle.prototype.setOpt = function(opt) {
+    this.opt = opt;
 };
-var changingDeps = {};
-var pending = false;
-var updating = false;
-
-var sessions = {};
-function x(file, extra) {
-    if (sessions[file.file]) {
-        var session =  sessions[file.file];
-        session.update(file);
-        return session;
-    }
-
-    var b = browserify(opt);
+Bundle.prototype.getOpt = function(opt) {
+    return this.opt;
+};
+Bundle.prototype.setTransform = function (transform) {
+    this.transform = transform;
+};
+Bundle.prototype.bundle = function(file) {
+    var b = browserify(this.opt);
+    this.b = b;
+    var opt = this.opt;
     b.add(file);
-    if (extra && extra.before) {
-      b = extra.before(b);
-    }
+    if (this.transform) b = this.transform(b) || b;
     b.on('reset', collect);
     collect();
     b.on('reset', reset);
     reset();
+    
+    // clear input file cache and pkgcache
+    var id = file.file;
+    if (opt.cache) delete opt.cache[id];
+    if (opt.pkgcache) delete opt.pkgcache[id];
 
     function collect () {
         var cache = opt.cache;
@@ -58,27 +73,8 @@ function x(file, extra) {
         }
         function end () {
             delta = Date.now() - time;
-            /*
-            console.log(
-             bytes + ' bytes written ('
-                + (delta / 1000).toFixed(2) + ' seconds)'
-            );
-            */
             this.push(null);
         }
-    }
-    var cache = opt.cache;
-    var pkgcache = opt.packageCache;
-
-    function update (file) {
-        res.utime = Date.now();
-        var id = file.file;
-        if (cache) delete cache[id];
-        if (pkgcache) delete pkgcache[id];
-        var record = b._recorded.filter(function(x) {
-            return x.file = id;
-        })[0];
-        record.source = file.source;
     }
 
     function bundle() {
@@ -99,26 +95,7 @@ function x(file, extra) {
         });
     }
 
-    var res = sessions[file.file] = {
-        update: update,
-        bundle: bundle,
-        ctime: Date.now()
-    };
-    return res;
-}
-
-x.deleteSessionByName = function (name) { delete sessions[name]; };
-x.deleteSessionByAge = function (age) {
-    var now = new Date();
-    if (!age) age = 1000 * 60 * 10; // 10 min for each session
-    var indices = [];
-    Object.keys(sessions).forEach(function(key) {
-        if (now - sessions[key].utime > age) {
-            x.deleteSession[key];
-        }
-    });
+    return bundle();
 };
-x.getSessions = function () { return sessions; };
 
-
-module.exports = x;
+module.exports = Bundle;
